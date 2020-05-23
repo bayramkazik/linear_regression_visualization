@@ -73,7 +73,7 @@ class LinearRegression:
 # CONSTS
 WIDTH, HEIGHT = 600, 600
 BACKGROUND = (20, 200, 70)
-
+POINT_DEL_COOLDOWN_VALUE = 5
 
 points = []
 
@@ -86,7 +86,7 @@ pygame.init()
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 pygame.display.set_caption('Linear Regression Visualization')
 
-point_add_cooldown = 5
+point_del_cooldown = POINT_DEL_COOLDOWN_VALUE
 
 font = pygame.font.SysFont('Arial', 20)
 
@@ -102,12 +102,12 @@ while not done:
             points.append(pygame.mouse.get_pos())
             lr_line_pos = calc_lr_line_pos(points)
     
-    if pygame.mouse.get_pressed()[2] and points and point_add_cooldown <= 0:
+    if pygame.mouse.get_pressed()[2] and points and point_del_cooldown <= 0:
         points.pop()
-        point_add_cooldown = 5
+        point_del_cooldown = POINT_DEL_COOLDOWN_VALUE
     
-    if point_add_cooldown > 0:
-        point_add_cooldown -= 1
+    if point_del_cooldown > 0:
+        point_del_cooldown -= 1
     
     screen.fill(BACKGROUND)
 
