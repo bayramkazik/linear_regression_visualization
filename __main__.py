@@ -105,6 +105,7 @@ while not done:
     if pygame.mouse.get_pressed()[2] and points and point_del_cooldown <= 0:
         points.pop()
         point_del_cooldown = POINT_DEL_COOLDOWN_VALUE
+        lr_line_pos = calc_lr_line_pos(points)
     
     if point_del_cooldown > 0:
         point_del_cooldown -= 1
