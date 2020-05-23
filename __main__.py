@@ -1,8 +1,9 @@
 import pygame
 from typing import Collection
 
-def average(iterable: Collection):
-    return sum(iterable) / len(iterable) if iterable else 0
+
+def average(l: Collection):
+    return sum(l) / len(l) if l else 0
 
 
 class LinearRegression:
@@ -39,7 +40,7 @@ class LinearRegression:
 
             total_difference += x_difference * y_difference
             total_x_difference_square += x_difference ** 2
-
+            
         return total_difference / total_x_difference_square if total_x_difference_square else 0
 
     def _calc_y_intercept(self):
@@ -56,16 +57,16 @@ class LinearRegression:
 def calc_lr_line_pos(point_data):
     x_list = []
     y_list = []
-    
+
     for x, y in point_data:
         x_list.append(x)
         y_list.append(y)
-    
+
     lr.fit(x_list, y_list)
-    
+
     line_start = 0, lr.predict(0)
     line_end = WIDTH, lr.predict(WIDTH)
-    
+
     return line_start, line_end
 
 
@@ -93,22 +94,22 @@ while not done:
             done = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
             left_pressed, _, right_pressed = pygame.mouse.get_pressed()
-            
+
             if left_pressed or right_pressed:
                 if left_pressed:
                     points.append(pygame.mouse.get_pos())
                 elif right_pressed and points:
                     points.pop()
                 lr_line_pos = calc_lr_line_pos(points)
-    
+
     screen.fill(BACKGROUND)
 
     for point in points:
         pygame.draw.circle(screen, (255, 165, 0), point, 7)
         pygame.draw.circle(screen, (50, 50, 50), point, 7, 1)
-    
+
     if lr_line_pos:
-        pygame.draw.line(screen, (0, 255, 0), *lr_line_pos)
+        pygame.draw.line(screen, (255, 0, 0), *lr_line_pos)
 
     clock.tick(60)
 
