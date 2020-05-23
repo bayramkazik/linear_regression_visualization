@@ -2,6 +2,22 @@ import pygame
 from typing import Collection
 
 
+def calc_lr_line_pos(point_data):
+    x_list = []
+    y_list = []
+
+    for x, y in point_data:
+        x_list.append(x)
+        y_list.append(y)
+
+    lr.fit(x_list, y_list)
+
+    line_start = 0, lr.predict(0)
+    line_end = WIDTH, lr.predict(WIDTH)
+
+    return line_start, line_end
+
+
 def average(l: Collection):
     return sum(l) / len(l) if l else 0
 
@@ -40,7 +56,7 @@ class LinearRegression:
 
             total_difference += x_difference * y_difference
             total_x_difference_square += x_difference ** 2
-            
+
         return total_difference / total_x_difference_square if total_x_difference_square else 0
 
     def _calc_y_intercept(self):
@@ -54,35 +70,25 @@ class LinearRegression:
         return self.slope * input + self.y_intercept
 
 
-def calc_lr_line_pos(point_data):
-    x_list = []
-    y_list = []
-
-    for x, y in point_data:
-        x_list.append(x)
-        y_list.append(y)
-
-    lr.fit(x_list, y_list)
-
-    line_start = 0, lr.predict(0)
-    line_end = WIDTH, lr.predict(WIDTH)
-
-    return line_start, line_end
-
-
 # CONSTS
 WIDTH, HEIGHT = 600, 600
 BACKGROUND = (20, 200, 70)
 
 
 points = []
+
 lr = LinearRegression()
 lr_line_pos = None
 
+pygame.font.init()
 pygame.init()
 
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 pygame.display.set_caption('Linear Regression Visualization')
+
+point_add_cooldown = 5
+
+font = pygame.font.SysFont('Arial', 20)
 
 clock = pygame.time.Clock()
 
@@ -92,16 +98,17 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            left_pressed, _, right_pressed = pygame.mouse.get_pressed()
-
-            if left_pressed or right_pressed:
-                if left_pressed:
-                    points.append(pygame.mouse.get_pos())
-                elif right_pressed and points:
-                    points.pop()
-                lr_line_pos = calc_lr_line_pos(points)
-
+        elif event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+            points.append(pygame.mouse.get_pos())
+            lr_line_pos = calc_lr_line_pos(points)
+    
+    if pygame.mouse.get_pressed()[2] and points and point_add_cooldown <= 0:
+        points.pop()
+        point_add_cooldown = 5
+    
+    if point_add_cooldown > 0:
+        point_add_cooldown -= 1
+    
     screen.fill(BACKGROUND)
 
     for point in points:
@@ -111,6 +118,20 @@ while not done:
     if lr_line_pos:
         pygame.draw.line(screen, (255, 0, 0), *lr_line_pos)
 
-    clock.tick(60)
+    if lr.is_fitted:
+        formula_text = 'y = mx + b'
+        textsurface = font.render(formula_text, True, (0, 0, 0))
+        screen.blit(textsurface, (10, 0))
+        
+        m_text = f'm = {str(lr.slope)[:6]}'
+        textsurface = font.render(m_text, True, (0, 0, 0))
+        screen.blit(textsurface, (10, 30))
+        
+        b_text = f'b = {str(lr.y_intercept)[:6]}'
+        textsurface = font.render(b_text, True, (0, 0, 0))
+        screen.blit(textsurface, (10, 60))
+
+
+    clock.tick(30)
 
     pygame.display.flip()
